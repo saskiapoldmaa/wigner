@@ -255,7 +255,7 @@ def estimate_N(expr: str, alpha: complex) -> int:
     N += 10 * complexity
 
     # --- clamp ---
-    N = min(max(N, 20), 150)  # between 20 and 150 for stability
+    N = min(max(N, 20), 50)  # between 20 and 150 for stability
     return N
 
 # ---------------------------------------------------------
