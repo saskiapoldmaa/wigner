@@ -556,8 +556,6 @@ app.layout = html.Div([
         )
     ], style={"flex": "1", "backgroundColor": "#fff", "position": "relative"}),
 
-
-
 ], style={
     "display": "flex", 
     "flexDirection": "row", 
@@ -713,7 +711,7 @@ def add_expression(n_clicks, n_submit, expr, current_list):
     if has_alpha:
         children.append(html.Div([
             html.Div([
-                html.Label("Re(α) =", style={"marginRight": "6px"}),
+                html.Label("$Re(\\alpha) =$", style={"marginRight": "6px"}),
                 dcc.Input(
                     id={"type": "alpha-input-re", "index": expr_idx},
                     type="number", step=0.01, value=0.0,
@@ -732,7 +730,7 @@ def add_expression(n_clicks, n_submit, expr, current_list):
             html.Br(),
 
             html.Div([
-                html.Label("Im(α) =", style={"marginRight": "6px"}),
+                html.Label("$Im(\\alpha) =$", style={"marginRight": "6px"}),
                 dcc.Input(
                     id={"type": "alpha-input-im", "index": expr_idx},
                     type="number", step=0.01, value=0.0,
@@ -748,6 +746,21 @@ def add_expression(n_clicks, n_submit, expr, current_list):
                 tooltip={"placement": "bottom", "always_visible": False},
                 updatemode="drag"
             ),
+            html.Div([
+                html.Hr(style={"margin": "12px 0"}),
+                html.P([
+                    html.Strong("Notes:"),
+                    html.Br(),
+                    "• This represents a Schrödinger cat state (superposition of +α and −α coherent states).",
+                    html.Br(),
+                    "• Adjust Re(α) and Im(α) to change the separation and phase of the lobes."
+                ], style={
+                    "fontSize": "0.9em",
+                    "color": "#444",
+                    "lineHeight": "1.3em",
+                    "marginTop": "6px"
+                })
+            ]),
         ], style={"marginBottom": "25px"}))
 
     # Replace the sidebar content entirely
@@ -880,7 +893,7 @@ def initialize_default(_):
     # --- α controls (copied from add_expression) ---
     alpha_controls = html.Div([
         html.Div([
-            html.Label("Re(α) =", style={"marginRight": "6px"}),
+            html.Label("$Re(\\alpha) =$", style={"marginRight": "6px"}),
             dcc.Input(
                 id={"type": "alpha-input-re", "index": expr_idx},
                 type="number", step=0.01, value=re_val,
@@ -899,7 +912,7 @@ def initialize_default(_):
         html.Br(),
 
         html.Div([
-            html.Label("Im(α) =", style={"marginRight": "6px"}),
+            html.Label("$Im(\\alpha) =$", style={"marginRight": "6px"}),
             dcc.Input(
                 id={"type": "alpha-input-im", "index": expr_idx},
                 type="number", step=0.01, value=im_val,
@@ -915,6 +928,36 @@ def initialize_default(_):
             tooltip={"placement": "bottom", "always_visible": False},
             updatemode="drag"
         ),
+        html.Div([
+            html.Span(
+                "$$"  # Use double dollars for display mode
+                "\\begin{aligned}"
+                "&\\textbf{Note that:} \\\\[4pt]"
+                "&-\\;\\text{It may take a while to load} \\\\[4pt]"
+                "& \\text{      (even after it seems to have stopped).} \\\\[4pt]"
+                "& \\text{      This is mainly due to issues with web hosting.} \\\\[4pt]"
+                "&-\\;\\text{The plot becomes imprecise at large } \\alpha \\\\[4pt]"
+                "& \\text{     values because of matrix truncation.}\\\\[30pt]"
+                "& \\textbf{Allowed syntax includes } \\\\[4pt]"
+                "& \\text{a, adag or adagger, alpha, alphastar, *, ^, +, -} \\\\[4pt]"
+                "& \\text{exp(), sin(), cos(), sinh(), ...} \\\\[4pt]"
+                "\\end{aligned}"
+                "$$",
+                style={
+                    "display": "block",
+                    "fontSize": "0.8em",
+                    "color": "#333",
+                    "lineHeight": "1.5em",
+                    "marginTop": "20px",
+                    "maxWidth": "95%",
+                    "wordBreak": "break-word",
+                    "textAlign": "left",  # CSS fallback
+                    "marginLeft": "0",
+                }
+            )
+        ])
+
+
     ], style={"marginBottom": "25px"})
 
     # --- Sidebar expression ---
