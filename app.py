@@ -91,7 +91,6 @@ app.index_string = '''
 import re
 
 def expr_to_latex(expr):
-    print("THe expr is", expr)
 
     """Convert operator expression to LaTeX format (robust against a^\dagger**2, alpha^*, etc.)."""
     if not expr:
@@ -109,7 +108,6 @@ def expr_to_latex(expr):
         chars.insert(left_brace_id, "{")
                     
     s = "".join(chars)
-    print("Check -1:", s)
 
     # 2) pretty operator 'a' -> \hat{a} (but keep other words intact)
     out = []
@@ -128,13 +126,11 @@ def expr_to_latex(expr):
     latex = ''.join(out)
     latex = latex.replace("*", " ")
 
-    print("Check 0:", latex)
 
     # 3) parameters
     
     latex = latex.replace("alpha", r"\alpha")
     latex = latex.replace("alphastar", r"alpha^* ")
-    print("Check 1:", latex)
 
     # replace standalone 'a' with \hat{a}
     latex = re.sub(r'\ba\b', r'\\hat{a}', latex)
@@ -143,7 +139,6 @@ def expr_to_latex(expr):
     latex = latex.replace('adagger', r'\hat{a}^{\dagger}')
     latex = latex.replace('adag', r'\hat{a}^{\dagger}')
 
-    print("latex is", latex)
 
     # 4) Convert exp(...) -> e^{...} (right-to-left so nested exps work)
     while "exp(" in latex:
@@ -162,7 +157,6 @@ def expr_to_latex(expr):
         else:
             break
 
-    print('check 2', latex)
     # Clean spacing a bit
     latex = ' '.join(latex.split())
 
@@ -405,7 +399,7 @@ def compute_wigner(expr, alpha_val=0+0j, N=None, omega=1.0, xlim=None, points=10
             xaxis_title="⟨x⟩",
             yaxis_title="⟨p⟩",
             zaxis_title="W(x,p)",
-            aspectratio=dict(x=1, y=1, z=0.5),
+            aspectratio=dict(x=1, y=1, z=0.7),
             camera=dict(
                 eye=dict(x=1.5, y=1.5, z=0.8),
                 up=dict(x=0, y=0, z=1),
@@ -426,14 +420,14 @@ def compute_wigner(expr, alpha_val=0+0j, N=None, omega=1.0, xlim=None, points=10
                 zerolinecolor='rgba(0,0,0,0.5)'
             ),
             zaxis=dict(
-                range=[-0.1, wigner_max * 1.1],  # Auto-scale based on Wigner function height
+                range=[-wigner_max, wigner_max * 1.1],  # Auto-scale based on Wigner function height
                 showbackground=False,
                 showgrid=True,
                 gridcolor='rgba(0,0,0,0.1)',
                 zerolinecolor='rgba(0,0,0,0.5)'
             )
         ),
-        margin=dict(l=0, r=0, b=0, t=60),
+        margin=dict(l=0, r=0, b=0, t=40),
         paper_bgcolor='white',
         plot_bgcolor='white'
     )
@@ -462,13 +456,15 @@ def adjust_dynamic_bounds(v, default_min=-1.0, default_max=1.0):
 # ---------------------------------------------------------
 app.layout = html.Div([
     html.Div([
-        html.H3("Operator:", style={"marginTop": "0", "color": "#2c3e50"}),
+    html.H3([
+        html.Span("$\\text{Operator acting on } |0\\rangle $", style={"fontSize": "1em"})
+    ], style={"marginTop": "0", "color": "#2c3e50"}),
         html.Div([
             html.Div(
                 dcc.Input(
                     id="expr-input",
                     type="text",
-                    placeholder="Enter operator (e.g. exp(a alpha - astar adagger))",
+                    placeholder="exp(a alpha - alphastar adagger)+exp(-alpha  a + alphastar adag)",
                     debounce=False,
                     style={
                         "width": "100%",
@@ -783,14 +779,21 @@ def add_expression(n_clicks, n_submit, expr, current_list):
 
     State("wigner-graph", "figure"),
 )
+
+
 def sync_all(re_inputs, im_inputs, re_sliders, im_sliders, expr_list, prev_fig):
     """Return clean outputs even when there are no α controls."""
-    # helper for empty pattern outputs (must be lists)
-    def empty_outputs():
-        return [ [] for _ in range(10) ]
 
-    if not expr_list:
-        return empty_outputs() + [go.Figure()]
+    # 🧩 1) Wait until alpha sliders actually exist (otherwise skip)
+    if not expr_list or not re_sliders or not im_sliders:
+        raise PreventUpdate
+
+    # 🧩 2) Ignore automatic first run before initialization finishes
+    if not ctx.triggered or ctx.triggered_id == "wigner-graph":
+        raise PreventUpdate
+
+    def empty_outputs():
+        return [[] for _ in range(10)]
 
     # extract latest expression text
     expr_text = None
@@ -862,14 +865,72 @@ def show_loading(*_):
     }
 
 
-# Hide "Calculating..." once figure update is complete
 @app.callback(
-    Output("loading-text", "style", allow_duplicate=True),
-    Input("wigner-graph", "figure"),
-    prevent_initial_call=True
+    Output("expr-list", "children", allow_duplicate=True),
+    Output("wigner-graph", "figure", allow_duplicate=True),
+    Input("wigner-graph", "id"),
+    prevent_initial_call="initial"
 )
-def hide_loading(_):
-    return {"display": "none"}
+def initialize_default(_):
+    # Schrödinger cat state
+    expr = "(exp(-alpha*adagger + alphastar*a) + exp(alpha*adagger - alphastar*a))"
+    expr_idx = 0
+    re_val, im_val = 0.2, -1.6
+
+    # --- α controls (copied from add_expression) ---
+    alpha_controls = html.Div([
+        html.Div([
+            html.Label("Re(α) =", style={"marginRight": "6px"}),
+            dcc.Input(
+                id={"type": "alpha-input-re", "index": expr_idx},
+                type="number", step=0.01, value=re_val,
+                style={"width": "80px", "marginRight": "8px"}
+            ),
+        ], style={"display": "flex", "alignItems": "center", "gap": "6px",
+                  "marginBottom": "4px"}),
+
+        dcc.Slider(
+            id={"type": "alpha-slider-re", "index": expr_idx},
+            min=-2, max=2, step=0.01, value=re_val,
+            marks={-2: "-2", 2: "2"},
+            tooltip={"placement": "bottom", "always_visible": False},
+            updatemode="drag"
+        ),
+        html.Br(),
+
+        html.Div([
+            html.Label("Im(α) =", style={"marginRight": "6px"}),
+            dcc.Input(
+                id={"type": "alpha-input-im", "index": expr_idx},
+                type="number", step=0.01, value=im_val,
+                style={"width": "80px", "marginRight": "8px"}
+            ),
+        ], style={"display": "flex", "alignItems": "center", "gap": "6px",
+                  "marginBottom": "4px"}),
+
+        dcc.Slider(
+            id={"type": "alpha-slider-im", "index": expr_idx},
+            min=-2, max=2, step=0.01, value=im_val,
+            marks={-2: "-2", 2: "2"},
+            tooltip={"placement": "bottom", "always_visible": False},
+            updatemode="drag"
+        ),
+    ], style={"marginBottom": "25px"})
+
+    # --- Sidebar expression ---
+    expr_list = [
+        html.Div([
+            html.Div(expr, id={"type": "expr-text", "index": expr_idx}, style={"display": "none"}),
+            html.Div(expr_to_latex(expr),
+                     style={"display": "block", "textAlign": "center", "fontSize": "1.3em"}),
+            alpha_controls
+        ])
+    ]
+
+    # --- Initial Wigner plot ---
+    fig = compute_wigner(expr, re_val + 1j * im_val)
+    return expr_list, fig
+
 
 
 if __name__ == "__main__":
