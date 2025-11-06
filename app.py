@@ -747,20 +747,33 @@ def add_expression(n_clicks, n_submit, expr, current_list):
                 updatemode="drag"
             ),
             html.Div([
-                html.Hr(style={"margin": "12px 0"}),
-                html.P([
-                    html.Strong("Notes:"),
-                    html.Br(),
-                    "• This represents a Schrödinger cat state (superposition of +α and −α coherent states).",
-                    html.Br(),
-                    "• Adjust Re(α) and Im(α) to change the separation and phase of the lobes."
-                ], style={
-                    "fontSize": "0.9em",
-                    "color": "#444",
-                    "lineHeight": "1.3em",
-                    "marginTop": "6px"
-                })
-            ]),
+            html.Span(
+                "$$"  # Use double dollars for display mode
+                "\\begin{aligned}"
+                "&\\textbf{Note that:} \\\\[4pt]"
+                "&-\\;\\text{It may take a while to load} \\\\[4pt]"
+                "& \\text{      (even after it seems to have stopped).} \\\\[4pt]"
+                "& \\text{      This is mainly due to issues with web hosting.} \\\\[4pt]"
+                "&-\\;\\text{The plot becomes imprecise at large } \\alpha \\\\[4pt]"
+                "& \\text{     values because of matrix truncation.}\\\\[30pt]"
+                "& \\textbf{Allowed syntax includes } \\\\[4pt]"
+                "& \\text{a, adag or adagger, alpha, alphastar, *, ^, +, -} \\\\[4pt]"
+                "& \\text{exp(), sin(), cos(), sinh(), ...} \\\\[4pt]"
+                "\\end{aligned}"
+                "$$",
+                style={
+                    "display": "block",
+                    "fontSize": "0.8em",
+                    "color": "#333",
+                    "lineHeight": "1.5em",
+                    "marginTop": "20px",
+                    "maxWidth": "95%",
+                    "wordBreak": "break-word",
+                    "textAlign": "left",  # CSS fallback
+                    "marginLeft": "0",
+                }
+            )
+        ])
         ], style={"marginBottom": "25px"}))
 
     # Replace the sidebar content entirely
