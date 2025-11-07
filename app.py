@@ -752,7 +752,7 @@ def add_expression(n_clicks, n_submit, expr, current_list):
                 "\\begin{aligned}"
                 "&\\textbf{Note that:} \\\\[4pt]"
                 "&-\\;\\text{It may take a while to load} \\\\[4pt]"
-                "& \\text{      (even after it seems to have stopped).} \\\\[4pt]"
+                "& \\text{      (even after it seems to have finished).} \\\\[4pt]"
                 "& \\text{      This is mainly due to issues with web hosting.} \\\\[4pt]"
                 "&-\\;\\text{The plot becomes imprecise at large } \\alpha \\\\[4pt]"
                 "& \\text{     values because of matrix truncation.}\\\\[30pt]"
