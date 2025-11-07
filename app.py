@@ -617,7 +617,7 @@ def show_suggestions(input_clicks, enter_pressed, add_clicks, overlay_clicks, vi
         {"label": "S(α)", "value": "exp(0.5*(alpha*adagger**2 - alphastar*a**2))"},
         {"label": "D(α)S(α)", "value": "exp(alpha*adagger - alphastar*a)*exp(0.5*(alpha*adagger**2 - alphastar*a**2))"},
         {"label": "S(α)D(α)", "value": "exp(0.5*(alpha*adagger**2 - alphastar*a**2))*exp(alpha*adagger - alphastar*a)"},
-        {"label": "D(α)+D(-α)", "value": "(exp(-alpha*adagger + alphastar*a) + exp(alpha*adagger - alphastar*a))"},
+        {"label": "D(α)+D(-α)", "value": "exp(-alpha*adagger + alphastar*a) + exp(alpha*adagger - alphastar*a)"},
     ]
 
     return html.Ul([
@@ -899,7 +899,7 @@ def show_loading(*_):
 )
 def initialize_default(_):
     # Schrödinger cat state
-    expr = "(exp(-alpha*adagger + alphastar*a) + exp(alpha*adagger - alphastar*a)"
+    expr = "(exp(-alpha*adagger + alphastar*a) + exp(alpha*adagger - alphastar*a))"
     expr_idx = 0
     re_val, im_val = 0.2, -1.6
 
